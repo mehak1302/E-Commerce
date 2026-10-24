@@ -1,0 +1,39 @@
+{% extends "base/base.html" %}
+
+{% block start %}
+<section class="section-content padding-y">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-7">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="text-success mb-3" style="font-size: 48px;">&#10003;</div>
+                        <h2 class="title">Payment successful</h2>
+                        <p>Your payment was verified and your order is confirmed.</p>
+                        <hr>
+                        <div class="text-left">
+                            <p>
+                                <span class="text-muted">Order ID</span><br>
+                                <strong class="text-break">{{ payment.razorpay_order_id }}</strong>
+                            </p>
+                            <p>
+                                <span class="text-muted">Payment ID</span><br>
+                                <strong class="text-break">{{ payment.razorpay_payment_id }}</strong>
+                            </p>
+                            <p>
+                                <span class="text-muted">Amount paid</span><br>
+                                <strong>₹{{ amount_rupees }}.00 {{ payment.currency }}</strong>
+                            </p>
+                            <p>
+                                <span class="text-muted">Status</span><br>
+                                <strong class="text-success">Paid</strong>
+                            </p>
+                        </div>
+                        <a href="/" class="btn btn-primary mt-2">Continue shopping</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

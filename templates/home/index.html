@@ -1,0 +1,147 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}Shop essentials | E-Commerce{% endblock %}
+
+{% block start %}
+<main class="container py-4 py-md-5">
+    <section class="home-hero mb-5">
+        <div class="row no-gutters align-items-center">
+            <div class="col-md-5">
+                <div class="home-hero-copy">
+                    <span class="badge badge-primary mb-3">Discover something new</span>
+                    <h1>Good finds.<br>Great everyday.</h1>
+                    <p class="text-light mt-3 mb-4">
+                        Discover thoughtful everyday picks across our collections.
+                    </p>
+                    <a href="#products" class="btn btn-primary">Shop products</a>
+                </div>
+            </div>
+            <div class="col-md-7">
+                <img
+                    class="home-hero-image"
+                    src="{% static 'images/home/galaxy-banner.png' %}"
+                    alt="Featured collection banner"
+                    fetchpriority="high">
+            </div>
+        </div>
+    </section>
+
+    <section class="mb-5" aria-labelledby="categories-title">
+        <div class="d-flex justify-content-between align-items-end mb-3">
+            <div>
+                <h2 id="categories-title" class="title mb-1">Explore categories</h2>
+                <p class="text-muted mb-0">A little inspiration for your next find.</p>
+            </div>
+            <a href="#products" class="text-primary">View products</a>
+        </div>
+
+        <div class="row">
+            {% for category in categories %}
+            <div class="col-6 col-md-4 col-lg-2 mb-3">
+                <a class="home-category-card text-center" href="{% url 'index' %}?category={{ category.slug }}#products">
+                    {% if category.category_image %}
+                        <img class="home-category-image" src="{{ category.category_image.url }}" alt="{{ category.category_name }}" loading="lazy" decoding="async">
+                    {% else %}
+                        <img class="home-category-image" src="{% static 'images/home/furniture.jpg' %}" alt="" loading="lazy" decoding="async">
+                    {% endif %}
+                    <div class="p-2">
+                        <strong>{{ category.category_name }}</strong>
+                        <span class="d-block small text-muted">{{ category.product_count }} product{{ category.product_count|pluralize }}</span>
+                    </div>
+                </a>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="alert alert-light border mb-0">
+                    Categories will appear here after you add them in the admin panel.
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section id="products" aria-labelledby="products-title">
+        <div class="mb-3">
+            {% if selected_category %}
+                <h2 id="products-title" class="title mb-1">{{ selected_category.category_name }}</h2>
+                <p class="text-muted mb-0">
+                    Products in this category.
+                    <a href="{% url 'index' %}#products">Show all products</a>
+                </p>
+            {% elif is_search %}
+                <h2 id="products-title" class="title mb-1">Search results for “{{ search_query }}”</h2>
+                <p class="text-muted mb-0">{{ products|length }} matching product{{ products|length|pluralize }} found.</p>
+            {% else %}
+                <h2 id="products-title" class="title mb-1">Shop our products</h2>
+                <p class="text-muted mb-0">Find something you'll love.</p>
+            {% endif %}
+        </div>
+
+        <div class="row">
+            {% for product in products %}
+            <div class="col-6 col-md-4 col-xl-3 mb-4">
+                <figure class="card card-product-grid h-100 mb-0">
+                    <a href="{% url 'get_product' product.slug %}" class="img-wrap">
+                        {% with product_image=product.product_images.first %}
+                            {% if product_image %}
+                                <img class="home-product-image" src="{{ product_image.image.url }}" alt="{{ product.product_name }}" loading="lazy" decoding="async">
+                            {% else %}
+                                <img class="home-product-image" src="{% static 'images/home/smartphones.jpg' %}" alt="" loading="lazy" decoding="async">
+                            {% endif %}
+                        {% endwith %}
+                    </a>
+                    <figcaption class="info-wrap border-top">
+                        <a href="{% url 'get_product' product.slug %}" class="title">
+                            <strong>{{ product.product_name }}</strong>
+                        </a>
+                        <div class="price mt-2">₹{{ product.price }}.00</div>
+                        <a href="{% url 'get_product' product.slug %}" class="btn btn-outline-primary btn-sm mt-3">
+                            View product
+                        </a>
+                    </figcaption>
+                </figure>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="alert alert-light border">
+                    {% if category_filter_invalid %}
+                        This category could not be found. Please choose a category from the list above.
+                    {% elif selected_category %}
+                        No products have been added to {{ selected_category.category_name }} yet.
+                    {% elif is_search %}
+                        No products matched “{{ search_query }}”. Try another product name or search term.
+                    {% else %}
+                        Products will appear here as soon as they are added to the store.
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="row mt-4" aria-label="Store information">
+        <div class="col-md-6 mb-3" id="delivery">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h3 class="h5"><i class="fa fa-truck text-primary mr-2"></i>Delivery information</h3>
+                    <p class="text-muted mb-0">
+                        Delivery arrangements and availability are confirmed with your order. For help with an order,
+                        contact the store administrator.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3" id="payment">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h3 class="h5"><i class="fa fa-lock text-primary mr-2"></i>Payment information</h3>
+                    <p class="text-muted mb-0">
+                        Pay securely in INR through Razorpay. Your order is confirmed only after payment is verified.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock %}

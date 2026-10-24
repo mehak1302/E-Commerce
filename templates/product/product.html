@@ -1,0 +1,199 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}{{ product.product_name }} | E-Commerce{% endblock %}
+
+{% block start %}
+<section class="section-content padding-y bg">
+    <div class="container">
+        <nav aria-label="Breadcrumb" class="small mb-3">
+            <a href="{% url 'index' %}">Home</a>
+            <span class="text-muted mx-2">/</span>
+            <a href="{% url 'index' %}?category={{ product.category.slug }}#products">{{ product.category.category_name }}</a>
+            <span class="text-muted mx-2">/</span>
+            <span class="text-muted">{{ product.product_name }}</span>
+        </nav>
+        <div class="card">
+            <div class="row no-gutters">
+                <aside class="col-md-6">
+                    <article class="gallery-wrap">
+                        <div class="img-big-wrap">
+                            {% with first_image=product.product_images.first %}
+                                {% if first_image %}
+                                    <img
+                                        id="product-main-image"
+                                        class="product-main-image"
+                                        src="{{ first_image.image.url }}"
+                                        alt="{{ product.product_name }}">
+                                {% else %}
+                                    <img
+                                        id="product-main-image"
+                                        class="product-main-image"
+                                        src="{% static 'images/home/smartphones.jpg' %}"
+                                        alt="{{ product.product_name }}">
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+                        <div class="thumbs-wrap text-center py-2">
+                            {% for image in product.product_images.all %}
+                                <button
+                                    type="button"
+                                    class="product-thumbnail{% if forloop.first %} active{% endif %}"
+                                    data-image-url="{{ image.image.url }}"
+                                    aria-label="View product image {{ forloop.counter }}">
+                                    <img src="{{ image.image.url }}" alt="" loading="lazy">
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </article>
+                </aside>
+
+                <main class="col-md-6 border-left">
+                    <article class="content-body">
+                        <h2 class="title">{{ product.product_name }}</h2>
+
+                        <p class="text-muted mb-3">
+                            <i class="fa fa-check-circle text-success mr-1" aria-hidden="true"></i>
+                            Carefully selected for your everyday needs
+                        </p>
+
+                        <div class="mb-3">
+                            <var class="price h4" id="product-price" data-base-price="{{ product.price }}">
+                                ₹{{ updated_price|default:product.price }}.00
+                            </var>
+                        </div>
+
+                        <p>{{ product.product_desription }}</p>
+
+                        <dl class="row">
+                            <dt class="col-sm-3">Category</dt>
+                            <dd class="col-sm-9">{{ product.category.category_name }}</dd>
+                            <dt class="col-sm-3">Delivery</dt>
+                            <dd class="col-sm-9">Delivery options shown at checkout</dd>
+                        </dl>
+
+                        <hr>
+
+                        <form method="post" action="{% url 'add_to_cart' product.uid %}" id="product-purchase-form">
+                            {% csrf_token %}
+
+                            <div class="form-row align-items-start">
+                                <div class="form-group col-auto">
+                                    <label for="product-quantity">Quantity</label>
+                                    <div class="input-group input-spinner">
+                                        <div class="input-group-prepend">
+                                            <button class="btn btn-light" type="button" data-quantity-change="-1" aria-label="Decrease quantity">−</button>
+                                        </div>
+                                        <input
+                                            type="number"
+                                            class="form-control"
+                                            id="product-quantity"
+                                            name="quantity"
+                                            value="1"
+                                            min="1"
+                                            max="99"
+                                            required>
+                                        <div class="input-group-append">
+                                            <button class="btn btn-light" type="button" data-quantity-change="1" aria-label="Increase quantity">+</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {% if sizes %}
+                                    <fieldset class="form-group col-md">
+                                        <legend class="h6">Select size</legend>
+                                        {% for size in sizes %}
+                                            <label class="variant-option">
+                                                <input
+                                                    type="radio"
+                                                    name="size_variant"
+                                                    value="{{ size.size_name }}"
+                                                    data-price="{{ size.price }}"
+                                                    {% if selected_size == size.size_name %}checked{% endif %}
+                                                    required>
+                                                {{ size.size_name }}
+                                                {% if size.price %}<small class="ml-1">(+₹{{ size.price }})</small>{% endif %}
+                                            </label>
+                                        {% endfor %}
+                                    </fieldset>
+                                {% endif %}
+                            </div>
+
+                            {% if colors %}
+                                <fieldset class="form-group">
+                                    <legend class="h6">Select color</legend>
+                                    {% for color in colors %}
+                                        <label class="variant-option">
+                                            <input
+                                                type="radio"
+                                                name="color_variant"
+                                                value="{{ color.color_name }}"
+                                                data-price="{{ color.price }}"
+                                                required>
+                                            {{ color.color_name }}
+                                            {% if color.price %}<small class="ml-1">(+₹{{ color.price }})</small>{% endif %}
+                                        </label>
+                                    {% endfor %}
+                                </fieldset>
+                            {% endif %}
+
+                            <button type="submit" name="buy_now" value="1" class="btn btn-primary">
+                                Buy now
+                            </button>
+                            <button type="submit" class="btn btn-outline-primary">
+                                <span class="text">Add to cart</span>
+                                <i class="fas fa-shopping-cart"></i>
+                            </button>
+                        </form>
+                    </article>
+                </main>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    (function () {
+        const quantityInput = document.getElementById('product-quantity');
+        const priceElement = document.getElementById('product-price');
+        const mainImage = document.getElementById('product-main-image');
+        const basePrice = Number(priceElement.dataset.basePrice);
+
+        document.querySelectorAll('[data-quantity-change]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                const change = Number(button.dataset.quantityChange);
+                const current = Number.parseInt(quantityInput.value, 10) || 1;
+                quantityInput.value = Math.min(99, Math.max(1, current + change));
+            });
+        });
+
+        function updatePrice() {
+            let price = basePrice;
+            document.querySelectorAll('input[name="size_variant"]:checked, input[name="color_variant"]:checked')
+                .forEach(function (variant) {
+                    price += Number(variant.dataset.price);
+                });
+            priceElement.textContent = '₹' + price.toLocaleString('en-IN') + '.00';
+        }
+
+        document.querySelectorAll('input[name="size_variant"], input[name="color_variant"]')
+            .forEach(function (variant) {
+                variant.addEventListener('change', updatePrice);
+            });
+        updatePrice();
+
+        document.querySelectorAll('.product-thumbnail').forEach(function (thumbnail) {
+            thumbnail.addEventListener('click', function () {
+                if (!mainImage) {
+                    return;
+                }
+                mainImage.src = thumbnail.dataset.imageUrl;
+                document.querySelectorAll('.product-thumbnail').forEach(function (item) {
+                    item.classList.remove('active');
+                });
+                thumbnail.classList.add('active');
+            });
+        });
+    })();
+</script>
+{% endblock %}

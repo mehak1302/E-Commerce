@@ -1,0 +1,130 @@
+{% extends "base/base.html" %}
+
+{% block start %}
+<section class="section-content padding-y">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-7">
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="title mb-4">Review your order</h2>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Amount to pay</span>
+                            <strong>₹{{ amount_rupees }}.00</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Currency</span>
+                            <span>{{ payment.currency }}</span>
+                        </div>
+                        <div class="mb-3">
+                            <span class="text-muted">Razorpay order ID</span>
+                            <div class="font-weight-bold text-break">{{ payment.razorpay_order_id }}</div>
+                        </div>
+                        <hr>
+                        <p class="text-muted">
+                            Your payment is processed securely by Razorpay. Your order is confirmed only
+                            after the payment is verified.
+                        </p>
+                        <form id="payment-csrf-form">
+                            {% csrf_token %}
+                        </form>
+                        <div id="payment-error" class="alert alert-danger d-none" role="alert"></div>
+                        <button id="pay-button" type="button" class="btn btn-primary btn-block">
+                            Pay ₹{{ amount_rupees }}.00
+                        </button>
+                        <a href="{% url 'cart' %}" class="btn btn-outline-secondary btn-block">Back to cart</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    const paymentError = document.getElementById('payment-error');
+    const csrfToken = document.querySelector('#payment-csrf-form [name=csrfmiddlewaretoken]').value;
+    let paymentVerified = false;
+    let paymentFailureRequest;
+
+    async function markPaymentFailed() {
+        if (paymentFailureRequest) {
+            return paymentFailureRequest;
+        }
+        const body = new URLSearchParams({
+            csrfmiddlewaretoken: csrfToken,
+            payment_uid: '{{ payment.uid|escapejs }}'
+        });
+        paymentFailureRequest = fetch("{% url 'payment_failed' %}", {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrfToken },
+            body
+        });
+        return paymentFailureRequest;
+    }
+
+    const options = {
+        key: '{{ razorpay_key_id|escapejs }}',
+        amount: '{{ payment.amount_paise }}',
+        currency: '{{ payment.currency|escapejs }}',
+        name: 'E-Commerce',
+        description: 'Order payment',
+        order_id: '{{ payment.razorpay_order_id|escapejs }}',
+        prefill: {
+            name: '{{ customer_name|escapejs }}',
+            email: '{{ customer_email|escapejs }}'
+        },
+        notes: {
+            order_id: '{{ payment.razorpay_order_id|escapejs }}'
+        },
+        theme: { color: '#3167eb' },
+        handler: async function (response) {
+            paymentVerified = true;
+            const body = new URLSearchParams({
+                csrfmiddlewaretoken: csrfToken,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature
+            });
+
+            try {
+                const verification = await fetch("{% url 'verify_payment' %}", {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken },
+                    body
+                });
+                const result = await verification.json();
+                if (!verification.ok) {
+                    throw new Error(result.error || 'Payment verification failed.');
+                }
+                window.location.assign(result.redirect_url);
+            } catch (error) {
+                paymentError.textContent = error.message;
+                paymentError.classList.remove('d-none');
+                paymentVerified = false;
+            }
+        },
+        modal: {
+            ondismiss: function () {
+                if (!paymentVerified) {
+                    markPaymentFailed().finally(function () {
+                        window.location.assign("{% url 'cart' %}");
+                    });
+                }
+            }
+        }
+    };
+
+    const checkout = new Razorpay(options);
+    checkout.on('payment.failed', function (response) {
+        paymentError.textContent = response.error.description || 'Payment failed. Please try again.';
+        paymentError.classList.remove('d-none');
+        markPaymentFailed().finally(function () {
+            window.location.assign("{% url 'cart' %}");
+        });
+    });
+    document.getElementById('pay-button').addEventListener('click', function () {
+        checkout.open();
+    });
+</script>
+{% endblock %}

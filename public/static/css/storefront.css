@@ -1,0 +1,355 @@
+:root {
+  --store-ink: #172033;
+  --store-muted: #687386;
+  --store-blue: #315fe8;
+  --store-border: #e8ebf1;
+  --store-surface: #fff;
+  --store-page: #f7f8fb;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  color: var(--store-ink);
+  background: var(--store-page);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+a {
+  color: var(--store-blue);
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid rgba(49, 95, 232, .35);
+  outline-offset: 2px;
+}
+
+.section-header .navbar.bg-dark {
+  background: #172033 !important;
+}
+
+.section-header .navbar .nav-link {
+  color: rgba(255, 255, 255, .78);
+  font-size: .82rem;
+  transition: color .18s ease;
+}
+
+.section-header .navbar .nav-link:hover {
+  color: #fff;
+}
+
+.header-main {
+  position: relative;
+  z-index: 2;
+  background: var(--store-surface);
+  box-shadow: 0 4px 18px rgba(23, 32, 51, .04);
+}
+
+.header-main .logo {
+  max-width: 100%;
+  max-height: 48px;
+  object-fit: contain;
+}
+
+.header-main .search .form-control {
+  min-height: 44px;
+  border-color: var(--store-border);
+  border-radius: 9px 0 0 9px;
+  background: #f8f9fc;
+}
+
+.header-main .search .btn {
+  min-width: 48px;
+  border-radius: 0 9px 9px 0;
+}
+
+.header-main .widget-header .icon {
+  border-color: var(--store-border) !important;
+  color: var(--store-ink);
+  transition: color .18s ease, border-color .18s ease, background .18s ease;
+}
+
+.header-main .widget-header .icon:hover {
+  border-color: var(--store-blue) !important;
+  color: var(--store-blue);
+  background: #f2f5ff;
+}
+
+.home-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #111827;
+  color: #fff;
+  box-shadow: 0 18px 44px rgba(23, 32, 51, .15);
+}
+
+.home-hero-copy {
+  position: relative;
+  z-index: 1;
+  padding: clamp(28px, 5vw, 58px);
+}
+
+.home-hero-copy .badge {
+  padding: .55rem .8rem;
+  border-radius: 999px;
+  background: rgba(95, 132, 255, .2);
+  color: #dce5ff;
+  font-size: .78rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.home-hero-copy h1 {
+  max-width: 510px;
+  margin-bottom: 0;
+  color: #fff;
+  font-size: clamp(2.35rem, 4.3vw, 3.65rem);
+  font-weight: 750;
+  letter-spacing: -.045em;
+  line-height: 1.04;
+}
+
+.home-hero-copy p {
+  max-width: 420px;
+  color: #c7cede !important;
+  font-size: 1.04rem;
+  line-height: 1.7;
+}
+
+.home-hero-copy .btn {
+  padding: .75rem 1.15rem;
+  border-radius: 9px;
+  box-shadow: 0 8px 20px rgba(49, 95, 232, .28);
+  font-weight: 600;
+}
+
+.home-hero-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+  object-fit: contain;
+  object-position: center;
+  background: #050505;
+}
+
+#categories-title,
+#products-title {
+  color: var(--store-ink);
+  font-weight: 700;
+  letter-spacing: -.025em;
+}
+
+.home-category-card {
+  display: block;
+  height: 100%;
+  overflow: hidden;
+  border-color: var(--store-border);
+  border-radius: 13px;
+  background: var(--store-surface);
+  color: inherit;
+  box-shadow: 0 2px 8px rgba(23, 32, 51, .025);
+}
+
+.home-category-card:hover {
+  border-color: #d7dfff;
+  box-shadow: 0 12px 26px rgba(23, 32, 51, .09);
+}
+
+.home-category-image {
+  display: block;
+  width: 100%;
+  height: 150px;
+  padding: 12px;
+  object-fit: contain;
+  background: #f3f5f9;
+}
+
+.home-category-card strong {
+  color: var(--store-ink);
+}
+
+.home-product-image {
+  width: 100%;
+  height: 210px;
+  padding: 14px;
+  object-fit: contain;
+  background: #f8f9fc;
+  transition: transform .25s ease;
+}
+
+.card-product-grid {
+  overflow: hidden;
+  border: 1px solid var(--store-border);
+  border-radius: 13px;
+  box-shadow: 0 3px 12px rgba(23, 32, 51, .035);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.card-product-grid:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 30px rgba(23, 32, 51, .1);
+}
+
+.card-product-grid:hover .home-product-image {
+  transform: scale(1.035);
+}
+
+.card-product-grid .info-wrap {
+  padding: 16px;
+  border-color: var(--store-border) !important;
+}
+
+.card-product-grid .info-wrap .title {
+  display: block;
+  min-height: 2.7em;
+  color: var(--store-ink);
+  line-height: 1.35;
+}
+
+.card-product-grid .price {
+  color: var(--store-ink);
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.card-product-grid .btn {
+  border-radius: 7px;
+  font-weight: 600;
+}
+
+.section-content .card {
+  overflow: hidden;
+  border: 1px solid var(--store-border);
+  border-radius: 14px;
+  box-shadow: 0 5px 18px rgba(23, 32, 51, .04);
+}
+
+.product-main-image {
+  display: block;
+  width: 100%;
+  max-height: 560px;
+  min-height: 360px;
+  object-fit: contain;
+  padding: 24px;
+  background: #f8f9fc;
+}
+
+.product-thumbnail {
+  width: 76px;
+  height: 76px;
+  padding: 4px;
+  margin: 0 4px;
+  border: 1px solid #d8dce3;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.product-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.product-thumbnail.active {
+  border: 2px solid var(--store-blue);
+}
+
+.product-thumbnail {
+  transition: border-color .18s ease, transform .18s ease;
+}
+
+.product-thumbnail:hover {
+  transform: translateY(-2px);
+}
+
+.variant-option {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 12px;
+  margin: 0 6px 6px 0;
+  border-radius: 8px;
+  border: 1px solid #d8dce3;
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease;
+}
+
+.variant-option:has(input:checked) {
+  border-color: var(--store-blue);
+  color: #2454c5;
+  background: #f2f5ff;
+}
+
+.variant-option input {
+  margin-right: 6px;
+}
+
+.input-spinner input {
+  min-width: 56px;
+  text-align: center;
+}
+
+.content-body .title {
+  color: var(--store-ink);
+  font-weight: 700;
+  letter-spacing: -.025em;
+}
+
+#product-price {
+  color: var(--store-blue);
+  font-weight: 700;
+}
+
+@media (max-width: 767.98px) {
+  .header-main .widgets-wrap {
+    margin-top: .75rem;
+  }
+
+  .header-main .widget-header .text {
+    font-size: .82rem;
+  }
+
+  .home-hero {
+    border-radius: 15px;
+  }
+
+  .home-hero-image {
+    height: auto;
+    min-height: 190px;
+    max-height: 240px;
+    object-fit: cover;
+    object-position: right center;
+  }
+
+  .home-category-image {
+    height: 125px;
+  }
+
+  .product-main-image {
+    min-height: 250px;
+    max-height: 360px;
+  }
+
+  .content-body {
+    padding: 1.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: .01ms !important;
+  }
+}

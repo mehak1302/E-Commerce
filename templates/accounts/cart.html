@@ -1,0 +1,190 @@
+{% extends "base/base.html" %}
+
+{% block start %}
+<section class="section-content padding-y">
+    <div class="container">
+        <h2 class="title mb-4">Your cart</h2>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row">
+            <div class="col-lg-8">
+                {% if cart_items %}
+                    <div class="card">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Color</th>
+                                    <th>Size</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in cart_items %}
+                                <tr>
+                                    <td>
+                                        {% if item.product %}
+                                            {{ item.product.product_name }}
+                                        {% else %}
+                                            Product unavailable
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ item.color_variant|default:"—" }}</td>
+                                    <td>{{ item.size_variant|default:"—" }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>
+                                        {% if item.product %}
+                                            ₹{{ item.get_total_price }}.00
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'remove_cart' item.uid %}" class="btn btn-sm btn-outline-danger">
+                                            Remove
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">Your cart is empty.</div>
+                {% endif %}
+            </div>
+
+            <aside class="col-lg-4">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Have coupon?</h5>
+                        {% if cart.coupon %}
+                            <p class="mb-2">
+                                <strong>{{ cart.coupon.coupon_name|default:cart.coupon.coupon_code }}</strong>
+                                <br>
+                                <small class="text-muted">Code: {{ cart.coupon.coupon_code }}</small>
+                                {% if cart.coupon.description %}
+                                    <br><small class="text-muted">{{ cart.coupon.description }}</small>
+                                {% endif %}
+                            </p>
+                            {% if cart.coupon.is_expired %}
+                                <p class="text-warning small">This coupon has expired and is no longer applied.</p>
+                            {% elif subtotal < cart.coupon.minimum_amount %}
+                                <p class="text-warning small">
+                                    Add ₹{{ cart_coupon_amount_to_unlock }}.00 more to meet this coupon's minimum.
+                                </p>
+                            {% else %}
+                                <p class="text-success small mb-2">Coupon applied successfully.</p>
+                            {% endif %}
+                            <form method="post" action="{% url 'remove_coupon' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger btn-block">Remove coupon</button>
+                            </form>
+                        {% else %}
+                            <form method="post" action="{% url 'apply_coupon' %}">
+                                {% csrf_token %}
+                                <div class="input-group">
+                                    <input type="text" name="coupon_code" class="form-control" placeholder="Coupon code" required>
+                                    <div class="input-group-append">
+                                        <button type="submit" class="btn btn-primary">Apply</button>
+                                    </div>
+                                </div>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if coupon_offers %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Available offers</h5>
+                            {% for offer in coupon_offers %}
+                                {% with coupon=offer.coupon %}
+                                <div class="border rounded p-2 mb-2">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <strong>{{ coupon.coupon_name|default:coupon.coupon_code }}</strong>
+                                        <span class="badge badge-success">₹{{ coupon.discount_price }} off</span>
+                                    </div>
+                                    <div class="small text-muted mt-1">
+                                        Code: <strong>{{ coupon.coupon_code }}</strong>
+                                    </div>
+                                    {% if coupon.description %}
+                                        <div class="small mt-1">{{ coupon.description }}</div>
+                                    {% endif %}
+                                    <div class="small mt-1">
+                                        Minimum order: ₹{{ coupon.minimum_amount }}
+                                    </div>
+                                    {% if cart.coupon_id == coupon.uid and coupon_discount %}
+                                        <span class="small text-success">Applied</span>
+                                    {% elif offer.amount_to_unlock %}
+                                        <span class="small text-warning">
+                                            Add ₹{{ offer.amount_to_unlock }}.00 more to unlock
+                                        </span>
+                                    {% else %}
+                                        <form method="post" action="{% url 'apply_coupon' %}" class="mt-2">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="coupon_code" value="{{ coupon.coupon_code }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-primary">Apply offer</button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                                {% endwith %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div class="card">
+                    <div class="card-body">
+                        {% if cart %}
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Subtotal:</span>
+                                <span>₹{{ subtotal }}.00</span>
+                            </div>
+                            {% if coupon_discount %}
+                                <p class="text-muted mb-2">
+                                    Coupon discount: -₹{{ coupon_discount }}.00
+                                </p>
+                            {% endif %}
+                            <div class="d-flex justify-content-between">
+                                <span>Total:</span>
+                                <strong>₹{{ cart.get_cart_total }}.00</strong>
+                            </div>
+                            {% if cart_items %}
+                                {% if pending_payment %}
+                                    <a href="{% url 'payment_checkout' pending_payment.uid %}" class="btn btn-primary btn-block mt-3">
+                                        Continue payment
+                                    </a>
+                                    <small class="text-muted d-block mt-2">
+                                        Pending order: {{ pending_payment.razorpay_order_id }}
+                                    </small>
+                                {% else %}
+                                    <form method="post" action="{% url 'start_payment' %}" class="mt-3">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-primary btn-block">
+                                            Make purchase · ₹{{ cart.get_cart_total }}.00
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            {% endif %}
+                        {% else %}
+                            <div class="d-flex justify-content-between">
+                                <span>Total:</span>
+                                <strong>₹0.00</strong>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <a href="/" class="btn btn-primary mt-3">Continue shopping</a>
+    </div>
+</section>
+
+{% endblock %}
