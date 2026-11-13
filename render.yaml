@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: ecommerce-django
+    env: python
+    buildCommand: "pip install -r requirements.txt && python manage.py migrate"
+    startCommand: "gunicorn ecommerce.wsgi:application"
